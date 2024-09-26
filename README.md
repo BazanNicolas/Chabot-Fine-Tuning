@@ -2,7 +2,7 @@
 # Contestador automático personalizado mediante Fine-Tuning de modelos de inteligencia artificial
 
 ## Resumen
-Este proyecto tiene como objetivo desarrollar un contestador automático personalizado que imite el estilo conversacional o personalidad de una persona a través de técnicas de inteligencia artificial. La solución se basará en el fine-tuning de un modelo preentrenado de lenguaje para generar respuestas automáticas adaptadas a un estilo específico de conversación. El modelo será entrenado utilizando datos reales proporcionados por los integrantes del proyecto, ajustando el comportamiento del contestador para replicar el tono, estilo y patrones conversacionales deseados. El proyecto incluirá también la limpieza y preparación de datos, el fine-tuning del modelo, y la evaluación del rendimiento. Este sistema será capaz de ofrecer respuestas coherentes y personalizadas en entornos que requieran interacción automática.
+Este proyecto tiene como objetivo desarrollar un contestador automático personalizado que imite el estilo conversacional o la personalidad de una persona a través de técnicas de inteligencia artificial. La solución se basará en el fine-tuning de un modelo de lenguaje preentrenado para generar respuestas automáticas adaptadas a un estilo conversacional específico. Para ello, se utilizarán datos reales proporcionados por los integrantes del proyecto, ajustando el comportamiento del sistema para replicar el tono, estilo y patrones comunicacionales deseados. El proyecto incluirá también la limpieza y preparación de los datos, el entrenamiento del modelo, y la evaluación de su rendimiento. El sistema resultante será capaz de ofrecer respuestas coherentes y personalizadas en entornos que requieran interacción automática.
 
 ## Hipótesis a evaluar
 
@@ -16,7 +16,7 @@ Este proyecto tiene como objetivo desarrollar un contestador automático persona
 2. **Delimitación del alcance del chatbot:** Definir las interacciones que el chatbot puede realizar y aquellas que no debe ejecutar. Se debe asegurar que el chatbot no genere respuestas que comprometan la privacidad o proporcionen información confidencial del entrenamiento.
 3. **Elección del modelo de lenguaje:** Determinar qué modelo se utilizará como base para realizar el fine-tuning, evaluando factores como el tamaño del modelo, su capacidad de generar texto coherente en español, y su compatibilidad con los datos disponibles.
 4. **Fine-Tuning del Modelo:** Aplicar el fine-tuning al modelo preentrenado utilizando los datos conversacionales proporcionados. Esto incluye ajustes para adaptar el estilo conversacional, así como el lenguaje específico de la región.
-5. **Evaluación del Desempeño y Optimización:** Medir la calidad de las respuestas generadas utilizando de entropía, para determinar el nivel de coherencia, naturalidad y similitud con el estilo conversacional original. Realizar ajustes en el modelo en función de los resultados obtenidos en las evaluaciones. Esto incluye optimizar el proceso de fine-tuning y ajustar los hiperparámetros para mejorar la precisión y relevancia de las respuestas generadas.
+5. **Evaluación del Desempeño y Optimización:** Medir la calidad de las respuestas generadas utilizando métricas de entropía para determinar el nivel de coherencia, naturalidad y similitud con el estilo conversacional original. Realizar ajustes en el modelo en función de los resultados obtenidos en las evaluaciones. Esto incluye optimizar el proceso de fine-tuning y ajustar los hiperparámetros para mejorar la precisión y relevancia de las respuestas generadas.
 
 ## Técnicas relevantes a aplicar
 
@@ -32,7 +32,7 @@ Este proyecto tiene como objetivo desarrollar un contestador automático persona
     
     -   Recopilar datos conversacionales.
     -   Anonimización de datos sensibles para proteger la privacidad.
-    -   Limpieza y formateo de los datos (eliminación de emojis y  arhivos multimedia, nombres, duplicados, y mensajes irrelevantes).
+    -   Limpieza y formateo de los datos (eliminación de emojis y  archivos multimedia, nombres, duplicados, y mensajes irrelevantes).
     -   Aplicación de técnicas de normalización, tokenización y segmentación de diálogos para preparar los datos para el entrenamiento del modelo.
     
 2.  **Fine-Tuning del Modelo (Semana 3-4):**
