@@ -1,58 +1,125 @@
-
 # Chatbot personalizado mediante Fine-Tuning de modelos de lenguaje
 
-## Resumen
-Este proyecto tiene como objetivo desarrollar un chatbot personalizado que imite el estilo conversacional de una persona a través de técnicas de inteligencia artificial. La solución se basará en el fine-tuning de un modelo de lenguaje preentrenado para generar respuestas automáticas adaptadas a un estilo conversacional específico. Para ello, se utilizarán datos reales proporcionados por los integrantes del proyecto, ajustando el comportamiento del sistema para replicar el tono, estilo y patrones comunicacionales deseados. El proyecto incluirá también la limpieza y preparación de los datos, el entrenamiento del modelo, y la evaluación de su rendimiento. El sistema resultante será capaz de ofrecer respuestas coherentes y personalizadas en entornos que requieran interacción automática.
+## Objetivo
 
-## Hipótesis a evaluar
+Utilizar **chats de Whatsapp** para entrenar un modelo de lenguaje mediante **Fine-Tuning**, con el objetivo de poder crear un **chatbot** que, de cierta forma, emule la personalidad del autor de los chats.
 
-1. **Fine-tuning mejora el rendimiento:** Se espera que el modelo  elegido, que ha pasado por el proceso de fine-tuning para ajustarse a un conjunto de datos personalizado, genere respuestas más relevantes, naturales y similares al estilo conversacional del usuario que un modelo preentrenado sin ajustes.
-2. **Evaluación de técnicas de fine-tuning:** Existen diversas formas de realizar fine-tuning (p. ej., diferentes modelos base, variaciones en los hiperparámetros y subconjuntos del dataset). Se explorarán estas variantes para identificar la más efectiva.
-3. **Adaptación regional del lenguaje:** Realizar un fine-tuning para ajustar el modelo al español de Argentina y luego a los datos conversacionales del usuario será beneficioso en la mejora del rendimiento del chatbot.
-  
-## Objetivos preliminares
+## Implementación
 
-1. **Recopilación y Preprocesamiento de Datos:** Obtener datos conversacionales de la plataforma _WhatsApp_ y consentimiento de las personas que provean su información personal y estructurarlos adecuadamente para su uso en el proceso de entrenamiento del modelo. Este paso incluye limpieza de elementos y mensajes innecesarios, la preparación de un dataset adecuado aplicando técnicas de normalización para estandarizar el texto, tokenización y segmentación de diálogos.
-2. **Delimitación del alcance del chatbot:** Definir las interacciones que el chatbot puede realizar y aquellas que no debe ejecutar. Se debe asegurar que el chatbot no genere respuestas que comprometan la privacidad o proporcionen información confidencial del entrenamiento.
-3. **Elección del modelo de lenguaje:** Determinar qué modelo se utilizará como base para realizar el fine-tuning, evaluando factores como el tamaño del modelo, su capacidad de generar texto coherente en español, y su compatibilidad con los datos disponibles.
-4. **Fine-Tuning del Modelo:** Aplicar el fine-tuning al modelo preentrenado utilizando los datos conversacionales proporcionados. Esto incluye ajustes para adaptar el estilo conversacional, así como el lenguaje específico de la región.
-5. **Evaluación del Desempeño y Optimización:** Medir la calidad de las respuestas generadas utilizando métricas de entropía para determinar el nivel de coherencia, naturalidad y similitud con el estilo conversacional original. Realizar ajustes en el modelo en función de los resultados obtenidos en las evaluaciones. Esto incluye optimizar el proceso de fine-tuning y ajustar los hiperparámetros para mejorar la precisión y relevancia de las respuestas generadas.
+### 1. Preparación de datos
 
-## Técnicas relevantes a aplicar
+#### 1.1 Limpieza de datos
 
-1. **Fine-Tuning:** Esta técnica permite adaptar un modelo generativo preentrenado a un conjunto de datos específico, lo que reduce los costos de computación, la huella de carbono y permite utilizar modelos de última generación sin tener que entrenar uno desde cero.
-   
-2. **Procesamiento de Lenguaje Natural (NLP):** Las técnicas de NLP serán fundamentales para limpiar y estructurar los datos de conversación, lo que incluye la eliminación de elementos no textuales, la normalización de datos, y el análisis semántico para permitir que el modelo genere respuestas contextualmente adecuadas.
+El primer paso es la **limpieza de datos**. <br>
+Para ello tuvimos en cuenta la estructura que mantienen los chats al ser exportados, para así poder parsearlos adecuadamente. También en esta instancia se eliminaron mensajes irrelevantes como por ejemplo aquellos que contenían imágenes.
 
-3. **Evaluación con Métricas de Calidad Conversacional:** En la evaluación del chatbot se utilizarán métricas basadas en **entropía** para medir la diversidad léxica, asegurando que el modelo no sea repetitivo ni incoherente. Además, la **perplejidad** complementará este análisis al medir qué tan bien el modelo predice secuencias de palabras coherentes. Junto con estas métricas automáticas, se realizarán **evaluaciones humanas** para juzgar la coherencia y naturalidad de las respuestas desde la perspectiva del usuario.
+#### 1.2 Agrupación de mensajes
 
-## Planificación
+Luego el siguiente paso fue la **agrupación de mensajes**. Al comienzo los resultados demostraban que algo estaba en falta, fue cuando nos dimos cuenta que los modelos necesitaban contexto. <br>
+El código agrupa de dos formas:
 
-1.  **Recolección y Preprocesamiento de Datos (Semana 1-2):**
-    
-    -   Recopilar datos conversacionales.
-    -   Limitación de datos sensibles para proteger la privacidad.
-    -   Limpieza y formateo de los datos (eliminación de emojis y archivos multimedia, nombres, duplicados, y mensajes irrelevantes).
-    -   Aplicación de técnicas de normalización, tokenización y segmentación de diálogos para preparar los datos para el entrenamiento del modelo.
-    
-2.  **Fine-Tuning del Modelo (Semana 3-4):**
-    
-    -   Selección de un modelo preentrenado.
-    -   Entrenamiento del modelo utilizando los datos preprocesados, ajustando los hiperparámetros y explorando diferentes técnicas.
-    -   Monitorización del proceso de entrenamiento.
- 
-3.  **Evaluación y Optimización (Semana 5-6):**
-    
-    -   Evaluar la calidad de las respuestas generadas utilizando métricas basadas en entropía (entropía de palabras, entropía condicional) y perplejidad para medir la diversidad y coherencia.
-    -   Realizar evaluaciones humanas para analizar la coherencia, naturalidad y similitud con el estilo conversacional original del usuario.
-    -   Ajustar los hiperparámetros y realizar iteraciones de mejora según los resultados obtenidos en las evaluaciones.
-      
-4.  **Documentación y presentación (Semana 7-8):**
- 
-    -   Redacción del informe final con un análisis de los resultados, incluyendo la efectividad de las técnicas empleadas, el rendimiento del chatbot y los desafíos encontrados.
-    -   Propuestas de mejoras futuras basadas en los resultados del proyecto y las evaluaciones de usuarios.
+Aquellos **mensajes seguidos de un mismo autor** se convierten en un único mensaje que contiene todos los mensajes enviados dentro de un **límite horario** separado por un tag interno. <br>
+Cuando uno textea, generalmente, envía múltiples mensajes que son congruentes entre sí, esta decisión soluciona un problema contextual que ayudará al modelo a generar respuestas donde pueda simular aquella natural forma de escribir, enviando un único mensaje que utiliza el separados como si estos fueran
+múltiples mensajes enviados en una corta franja de tiempo.
+
+Luego encontramos necesario darle algo de **contexto sobra la conversación** que se estaba manteniendo entre el autor y el otro usuario. Para ello agrupamos bloques de conversaciones según un límite horario y
+de cantidad, luego se entrenaron los modelos con estos grupos de mensajes.
+
+### 2. Elección de modelos
+
+Para llevar a cabo el proyecto, se investigaron **distintos modelos de lenguaje** que según sus especificaciones parecían adecuarse a nuestros requisitos: entrenado para español, orientado a conversación y que no sea un modelo demasiado _grande_.
+
+### 3. Configuración y Entrenamiento
+
+Esta etapa fue de prueba y error, donde también tuvimos en cuenta la recomendación particular según el modelo. <br>
+Inicialmente estuvimos limitados por el hardware y el progreso no era tan significativo, ya que tuvimos que elegir modelos pequeños y reducir la cantidad de datos y épocas. Una vez eso no representó una barrera, comprobamos una gran mejora.<br>
+
+### 4. Comparación y pruebas
+
+En las distintas notebooks, **se compararon el modelo base y el modelo fine-tuned**, en algunas utilizando promps sacadas de los mismos chats y otras con promps predefinidas. En los 3 modelos hubieron cambios significativos entre su base y fine-tune, pero no todos se acercaron al objetivo planteado. Este análisis se puede ver a profundidad en la sección _Conclusiones_. <br>
+
+Para comparar la mejora entre el modelo base y el fine-tuned, nos basamos en la métrica de **Perplexity**.<br>
+En criollo esta métrica evalúa entre cuántas _opciones_ está debatiendo el modelo para poder predecir la siguiente palabra. Entonces a menor Perplexity tendrá menor cantidad de opciones, por lo que estas serán más certeras.
+
+## Comparación de modelos
+
+En este repositorio se podran encontrar tres distintas implementaciones del chatbot, cuya mayor diferencia recae en los distintos modelos de lenguaje elegidos. <br>
+En la siguiente tabla se compararan los tres modelos elegidos: [**GPT-2 spanish**](https://huggingface.co/DeepESP/gpt2-spanish), [**SmolLM3-3B**](https://huggingface.co/HuggingFaceTB/SmolLM3-3B), [**Phi3**](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct). <br>
+
+TODO
+
+## ¿Cómo utilizar las notebooks?
+
+Lo más interesante de este proyecto será comprobar si el modelo de lenguaje consigue emular nuestra personalidad virtual, la intención de este repositorio público es que toda persona pueda interactuar con su propio chatbot personalizado. <br>
+
+Con tal de lograrlo, deberá seguir los siguientes pasos. <br>
+Además dentro de las notebooks hemos dejado comentarios y guías para que sepa qué está ejecutando en cada celda. <br>
+
+### 1. Conseguir los chats de WhatsApp
+
+Las conversaciones que mantenemos por WhatsApp no nos pertenecen únicamente a nosotros, por lo que antes de proseguir, es importante que consiga el consentimiento de toda persona cuyo chat desea utilizar para entrenar el modelo. <br>
+
+Ahora, con el consentimiento dado: <br>
+
+- Dentro del chat con la persona deberá seleccionar:
+  los tres puntitos-> Más -> Exportar chat
+- Esto generará un archivo .txt.
+- Repita el proceso para conseguir una cantidad adecuada de ejemplos.
+- Por último junte todos los chats, uno tras otro, en un archivo .txt, por ejemplo _chats.txt_.
+
+Como guía, el archivo _chats.txt_ que utilizamos para el entrenamiento contaba con un total de 153700 líneas, lo que generaba TODO conversaciones y luego del filtrado quedaron TODO conversaciones útiles.
+
+### 2. Asegurar un entorno de ejecución
+
+Entrenar modelos de lenguaje no es tarea trivial para nuestro hardware, necesitaremos de una GPU que resista el entrenamiento y un entorno que nos permita utilizarla ininterrumpidamente por un tiempo que puede variar entre minutos u horas, dependiendo la cantidad de conversaciones de los datos o las especificaciones de la GPU. Por ejemplo nosotros empezamos utilizando [Google Colab](https://colab.google/), pero para la cantidad de chats y en modelos más grandes que GPT-2, las 15GB de la GPU Nvidia T4 del plan gratuito no fueron suficientes. Si usted desea obtener resultados similares, recomendamos ampliamente clonar este repositorio en un entorno que soporte esta clase de exigencias.
+
+### 3. Carga de datos
+
+En las notebooks encontrará una celda interactiva, que le permitirá cargar su archivo txt y especificar el nombre del autor, es escencial que este coincida tal cual aparece en el archivo de chats. <br>
+
+En las siguientes celdas se filtrarán los datos y acomodarán según el modelo, generandose así un archivo que será el utilizado para el entrenamiento. <br>
+
+En este punto recomendamos reiniciar el kernel, tendrá que ejecutar menos líneas y podrá continuar al siguiente paso. Esto para reducir la memoria de la GPU y prepararla para la siguiente etapa. <br>
+
+### 4. Entrenamiento
+
+Dependiendo del modelo que haya elegido, su hardware disponible y la cantidad de conversaciones que se hayan conservado de sus chats; esto tomará mayor o menor tiempo, pero a comparación con el resto, esta es la etapa que tomará más tiempo. <br>
+
+Una vez terminado el entrenamiento, el modelo será guardado. Si cuenta con un entorno de ejecución como Google Colab que elimina los archivos una vez desconectado del Kernel, no olvide de descargar el modelo entrenado.
+
+### 5. Comprobación, Chatbot y Métricas
+
+Las siguientes celdas cuentan con una **comprobación** para aquellos que quieran ver ejemplos de respuesta entre el modelo base y el fine-tuneado. <br>
+Seguido por el **chatbot** interactivo, en el cuál podrá enviarle el mensaje (prompt) que desee y obtendrá la respuesta del modelo fine-tuned. <br>
+Por último, si desea visualizarlo, se encuentran **evaluaciones** donde se compara la Perplexity entre el modelo base y el fine-tuned. <br>
+
+## Conclusión
+
+TODO
+
+## Tecnologías utilizadas
+
+- Python 3.13.11
+- JupyterHub
+- Tarjeta gráfica A30
+- [Centro de Computación de Alto Desempeño (CCAD)](https://supercomputo.unc.edu.ar/ccad/)
+
+## Agradecimientos
+
+Este trabajo utilizó recursos computacionales de [**UNC Supercómputo (CCAD) de la Universidad Nacional de Córdoba**](https://supercomputo.unc.edu.ar), que forman parte del Sistema Nacional de Computación de Alto Desempeño (SNCAD) de la República **Argentina**. <br>
+
+## Créditos
+
+Proyecto realizado para la materia Minería de Texto, de la Facultad de Astronomía, Matemática y Física (FAMAF) de la Universidad Nacional de Córdoba (UNC), bajo la supervisión de la profesora Laura Alonso Alemany. <br>
+
+Integrantes:
+
+- [Nicolás Bazan](https://github.com/BazanNicolas)
+- [Melina Rocío Morales](https://github.com/Paaprikaa)
 
 ## Referencias
 
-1. IBM. (s.f.). *What is fine-tuning?*. Recuperado de [https://www.ibm.com/es-es/topics/fine-tuning](https://www.ibm.com/es-es/topics/fine-tuning)
-2. Hugging Face. (s.f.). *Training and fine-tuning*. En *Hugging Face Documentation*. Recuperado de [https://huggingface.co/docs/transformers/es/training](https://huggingface.co/docs/transformers/es/training)
+1. IBM. (s.f.). _What is fine-tuning?_. Recuperado de https://www.ibm.com/es-es/topics/fine-tuning
+2. Hugging Face. (s.f.). _Training and fine-tuning_. En _Hugging Face Documentation_. Recuperado de https://huggingface.co/docs/transformers/es/training
+3. Comet November 21, 2024. _Perplexity for LLM Evaluation_. Recuperado de https://www.comet.com/site/blog/perplexity-for-llm-evaluation/
+4. UNC Supercómputo Wiki (s.f.). Recuperado de https://wiki.ccad.unc.edu.ar/
