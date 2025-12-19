@@ -11,7 +11,9 @@ Utilizar **chats de Whatsapp** para entrenar un modelo de lenguaje mediante **Fi
 #### 1.1 Limpieza de datos
 
 El primer paso es la **limpieza de datos**. <br>
-Para ello tuvimos en cuenta la estructura que mantienen los chats al ser exportados, para así poder parsearlos adecuadamente. También en esta instancia se eliminaron mensajes irrelevantes como por ejemplo aquellos que contenían imágenes.
+Para ello tuvimos en cuenta la estructura que mantienen los chats al ser exportados, para así poder parsearlos adecuadamente. También en esta instancia se eliminaron mensajes irrelevantes como por ejemplo aquellos que contenían imágenes. <br>
+
+Para los modelos _Phi-3_ y _GPT2-spanish_ se filtró además ciertas conversaciones por similitud, es decir si la conversación parecía "incoherente" se la descartaba. En cuanto a _GPT2_ el descarte era necesario, ya que al ser un modelo con menor capacidad aquel _ruido_ podría confudirlo más que beneficiarlo. Luego se optó por contrastar _Phi-3_ y _SmolLM3-3B_, aunque ninguno de estos modelos necesita el filtrado por similitud, se quiso comprobar si al no filtrar aquellas conversaciones caóticas y ruidosas, se puede llegar a potenciar un diálogo con mayor naturalidad. <br>
 
 #### 1.2 Agrupación de mensajes
 
@@ -34,6 +36,12 @@ Para llevar a cabo el proyecto, se investigaron **distintos modelos de lenguaje*
 Esta etapa fue de prueba y error, donde también tuvimos en cuenta la recomendación particular según el modelo. <br>
 Inicialmente estuvimos limitados por el hardware y el progreso no era tan significativo, ya que tuvimos que elegir modelos pequeños y reducir la cantidad de datos y épocas. Una vez eso no representó una barrera, comprobamos una gran mejora.<br>
 
+Al momento de fine-tunear los modelos, tanto para _Phi-3_ y _SmolLM3-3B_ se utilizó **SFT** (Supervised Fine-Tuning), para poder especificarle al modelo la respuesta esperada (mensaje del autor) dada cierta entrada (mensaje de otro usuario). <br>
+Mientras que para _GPT2-spanish_ se aplicó fine-tuning de tipo **CLM** (Causal Language Modeling), esta decisión se debe a que _GPT2_ fue creado específicamente para ser entrenado bajo CLM.
+
+El entrenamiento de los modelos _Phi-3_ y _SmolLM3-3B_ esta optimizado por **QLoRA** (Quantized Low-Rank Adaptation), donde la Q en el acrónimo representa compresión, de 16bits a 4bits, permitiendo que el modelo ocupe menor espacio en la memoria de la GPU; y según [_¿Qué es la adaptación de bajo rango (LoRA)?_ de Cloudflare](https://www.cloudflare.com/es-es/learning/ai/what-is-lora/): "LoRA congela las ponderaciones y los parámetros del modelo tal como están. Luego, sobre este modelo original, agrega una adición ligera llamada matriz de rango bajo, que luego se aplica a nuevas entradas para obtener resultados específicos para el contexto. La matriz de rango bajo se ajusta a las ponderaciones del modelo original para que los resultados coincidan con el caso de uso deseado". <br>
+No se consideró necesario aplicarlo a _GPT2_ dado que es un modelo relativamente pequeño. <br>
+
 ### 4. Comparación y pruebas
 
 En las distintas notebooks, **se compararon el modelo base y el modelo fine-tuned**, en algunas utilizando promps sacadas de los mismos chats y otras con promps predefinidas. En los 3 modelos hubieron cambios significativos entre su base y fine-tune, pero no todos se acercaron al objetivo planteado. Este análisis se puede ver a profundidad en la sección _Conclusiones_. <br>
@@ -44,9 +52,55 @@ En criollo esta métrica evalúa entre cuántas _opciones_ está debatiendo el m
 ## Comparación de modelos
 
 En este repositorio se podran encontrar tres distintas implementaciones del chatbot, cuya mayor diferencia recae en los distintos modelos de lenguaje elegidos. <br>
-En la siguiente tabla se compararan los tres modelos elegidos: [**GPT-2 spanish**](https://huggingface.co/DeepESP/gpt2-spanish), [**SmolLM3-3B**](https://huggingface.co/HuggingFaceTB/SmolLM3-3B), [**Phi3**](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct). <br>
+En la siguiente tabla se comparan datos técnicos y elecciones de diseño que se tomaron de los tres modelos elegidos: [**GPT2-spanish**](https://huggingface.co/DeepESP/gpt2-spanish), [**SmolLM3-3B**](https://huggingface.co/HuggingFaceTB/SmolLM3-3B), [**Phi-3**](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct).
 
-TODO
+| Característica                  |                  SmolLM3-3B                  |                             Phi-3                             |                   GPT2-spanish                    |
+| ------------------------------- | :------------------------------------------: | :-----------------------------------------------------------: | :-----------------------------------------------: |
+| Cantidad de parámetros          |                      3B                      |                             3.8B                              |                       124M                        |
+| Fine-Tuning aplicado            |         SFT (Supervised Fine-Tuning)         |                 SFT (Supervised Fine-Tuning)                  |          CLM (Causal Language Modeling)           |
+| QLoRA                           |                      ✅                      |                              ✅                               |                        ❌                         |
+| Filtrado de datos por similitud |                      ❌                      |                              ✅                               |                        ✅                         |
+| Tags                            |     <\|im_start\|>role ... <\|im_end\|>      | <\|system\|>...<\|end\|><\|user\|>...<\|end\|><\|assistant\|> | <\|talk\|><\|ax1\|>...<\|ax2\|>...<\|endoftext\|> |
+| Interfaz de Datos               | **Chat Templates** {role: ..., content: ...} |                         Manual String                         |                   Manual String                   |
+
+### Modelo base vs modelo fine-tuned
+
+Los siguientes ejemplos buscan comparar individualmente cada modelo base contra su propio modelo fine-tuneado, basandonos en la respuesta obtenida según una prompt predefinida. <br>
+
+TODO: carga de datos
+
+#### GPT2-spanish
+
+> Pregunta:
+
+| Base | Fine-Tuned |
+| ---- | ---------- |
+|      |            |
+
+#### Phi-3
+
+> Pregunta:
+
+| Base | Fine-Tuned |
+| ---- | ---------- |
+|      |            |
+
+#### SmolLM3-3B
+
+> Pregunta:
+
+| Base | Fine-Tuned |
+| ---- | ---------- |
+|      |            |
+
+### GPT2-spanish vs Phi-3 vs SmolLM3-3B
+
+| Prompt/Pregunta | Respuesta: GPT2 | Respuesta: Phi-3 | Respuesta: SmolLM3-3B |
+| --------------- | --------------- | ---------------- | --------------------- |
+|                 |                 |                  |                       |
+|                 |                 |                  |                       |
+|                 |                 |                  |                       |
+|                 |                 |                  |                       |
 
 ## ¿Cómo utilizar las notebooks?
 
@@ -71,13 +125,15 @@ Como guía, el archivo _chats.txt_ que utilizamos para el entrenamiento contaba 
 
 ### 2. Asegurar un entorno de ejecución
 
-Entrenar modelos de lenguaje no es tarea trivial para nuestro hardware, necesitaremos de una GPU que resista el entrenamiento y un entorno que nos permita utilizarla ininterrumpidamente por un tiempo que puede variar entre minutos u horas, dependiendo la cantidad de conversaciones de los datos o las especificaciones de la GPU. Por ejemplo nosotros empezamos utilizando [Google Colab](https://colab.google/), pero para la cantidad de chats y en modelos más grandes que GPT-2, las 15GB de la GPU Nvidia T4 del plan gratuito no fueron suficientes. Si usted desea obtener resultados similares, recomendamos ampliamente clonar este repositorio en un entorno que soporte esta clase de exigencias.
+Entrenar modelos de lenguaje no es tarea trivial para nuestro hardware, necesitaremos de una GPU que resista el entrenamiento y un entorno que nos permita utilizarla ininterrumpidamente por un tiempo que puede variar entre minutos u horas, dependiendo la cantidad de conversaciones de los datos o las especificaciones de la GPU. Por ejemplo nosotros empezamos utilizando [Google Colab](https://colab.google/), pero para la cantidad de chats y en modelos más grandes que GPT2-spanish, las 15GB de la GPU Nvidia T4 del plan gratuito no fueron suficientes. Si usted desea obtener resultados similares, recomendamos ampliamente clonar este repositorio en un entorno que soporte esta clase de exigencias.
 
 ### 3. Carga de datos
 
 En las notebooks encontrará una celda interactiva, que le permitirá cargar su archivo txt y especificar el nombre del autor, es escencial que este coincida tal cual aparece en el archivo de chats. <br>
 
 En las siguientes celdas se filtrarán los datos y acomodarán según el modelo, generandose así un archivo que será el utilizado para el entrenamiento. <br>
+
+La celda _Análisis estadístico y calidad del dataset por etapas_ le permitirá evaluar si el dataset provisto es adecuado para el entrenamiento, se exhiben los datos en dos etapas del dataset: inicial (la que usted ingresa sin modificaciones) y filtrada (se realizó la limpieza necesaria). <br>
 
 En este punto recomendamos reiniciar el kernel, tendrá que ejecutar menos líneas y podrá continuar al siguiente paso. Esto para reducir la memoria de la GPU y prepararla para la siguiente etapa. <br>
 
@@ -95,7 +151,7 @@ Por último, si desea visualizarlo, se encuentran **evaluaciones** donde se comp
 
 ## Conclusión
 
-TODO
+TODO: datos perplexity + redacción
 
 ## Tecnologías utilizadas
 
@@ -123,3 +179,4 @@ Integrantes:
 2. Hugging Face. (s.f.). _Training and fine-tuning_. En _Hugging Face Documentation_. Recuperado de https://huggingface.co/docs/transformers/es/training
 3. Comet November 21, 2024. _Perplexity for LLM Evaluation_. Recuperado de https://www.comet.com/site/blog/perplexity-for-llm-evaluation/
 4. UNC Supercómputo Wiki (s.f.). Recuperado de https://wiki.ccad.unc.edu.ar/
+5. CLOUDFLARE (s.f.). _¿Qué es la adaptación de bajo rango (LoRA)?_ Recuperado de https://www.cloudflare.com/es-es/learning/aiwhat-is-lora/
