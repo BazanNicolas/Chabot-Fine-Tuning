@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Utilizar **chats de Whatsapp** para entrenar un modelo de lenguaje mediante **Fine-Tuning**, con el objetivo de poder crear un **chatbot** que, de cierta forma, emule la personalidad del autor de los chats.
+Utilizar **chats de Whatsapp** para entrenar un modelo de lenguaje mediante **Fine-Tuning** de LLMs, con el objetivo de poder crear un **chatbot** que, de cierta forma, emule la personalidad del autor de los chats.
 
 ## Implementación
 
@@ -37,17 +37,23 @@ Esta etapa fue de prueba y error, donde también tuvimos en cuenta la recomendac
 Inicialmente estuvimos limitados por el hardware y el progreso no era tan significativo, ya que tuvimos que elegir modelos pequeños y reducir la cantidad de datos y épocas. Una vez eso no representó una barrera, comprobamos una gran mejora.<br>
 
 Al momento de fine-tunear los modelos, tanto para _Phi-3_ y _SmolLM3-3B_ se utilizó **SFT** (Supervised Fine-Tuning), para poder especificarle al modelo la respuesta esperada (mensaje del autor) dada cierta entrada (mensaje de otro usuario). <br>
-Mientras que para _GPT2-spanish_ se aplicó fine-tuning de tipo **CLM** (Causal Language Modeling), esta decisión se debe a que _GPT2_ fue creado específicamente para ser entrenado bajo CLM.
+Mientras que para _GPT2-spanish_ se aplicó fine-tuning de tipo **CLM** (Casual Language Modeling), esta decisión se debe a que _GPT2_ fue creado específicamente para ser entrenado bajo CLM.
 
-El entrenamiento de los modelos _Phi-3_ y _SmolLM3-3B_ esta optimizado por **QLoRA** (Quantized Low-Rank Adaptation), donde la Q en el acrónimo representa compresión, de 16bits a 4bits, permitiendo que el modelo ocupe menor espacio en la memoria de la GPU; y según [_¿Qué es la adaptación de bajo rango (LoRA)?_ de Cloudflare](https://www.cloudflare.com/es-es/learning/ai/what-is-lora/): "LoRA congela las ponderaciones y los parámetros del modelo tal como están. Luego, sobre este modelo original, agrega una adición ligera llamada matriz de rango bajo, que luego se aplica a nuevas entradas para obtener resultados específicos para el contexto. La matriz de rango bajo se ajusta a las ponderaciones del modelo original para que los resultados coincidan con el caso de uso deseado". <br>
-No se consideró necesario aplicarlo a _GPT2_ dado que es un modelo relativamente pequeño. <br>
+El entrenamiento de los modelos _Phi-3_ y _SmolLM3-3B_ se optimizó mediante **QLoRA** (Quantized Low-Rank Adaptation), una técnica que combina **cuantización** y **adaptación de bajo rango** para reducir significativamente el uso de memoria GPU durante el fine-tuning. <br>
+En este enfoque, el modelo base se carga en formato cuantizado de **4 bits**, lo que disminuye su tamaño en memoria sin modificar sus pesos originales. Sobre este modelo congelado se agregan capas **LoRA**, que consisten en matrices de bajo rango entrenables encargadas de ajustar el comportamiento del modelo al caso de uso específico.
+
+Como describe Cloudflare en [_¿Qué es la adaptación de bajo rango (LoRA)?_](https://www.cloudflare.com/es-es/learning/ai/what-is-lora/):  
+"LoRA congela las ponderaciones y los parámetros del modelo tal como están. Luego, sobre este modelo original, agrega una adición ligera llamada matriz de rango bajo, que luego se aplica a nuevas entradas para obtener resultados específicos para el contexto. La matriz de rango bajo se ajusta a las ponderaciones del modelo original para que los resultados coincidan con el caso de uso deseado". <br>
+
+Esta combinación permite realizar fine-tuning supervisado de modelos grandes de forma eficiente, manteniendo un buen rendimiento y reduciendo considerablemente los requisitos computacionales.  
+En el caso de _GPT2-spanish_, no se consideró necesario aplicar QLoRA debido a que se trata de un modelo relativamente pequeño, cuyo entrenamiento puede realizarse directamente sin restricciones significativas de memoria.
+
+
 
 ### 4. Comparación y pruebas
 
-En las distintas notebooks, **se compararon el modelo base y el modelo fine-tuned**, en algunas utilizando promps sacadas de los mismos chats y otras con promps predefinidas. En los 3 modelos hubieron cambios significativos entre su base y fine-tune, pero no todos se acercaron al objetivo planteado. Este análisis se puede ver a profundidad en la sección _Conclusiones_. <br>
-
-Para comparar la mejora entre el modelo base y el fine-tuned, nos basamos en la métrica de **Perplexity**.<br>
-En criollo esta métrica evalúa entre cuántas _opciones_ está debatiendo el modelo para poder predecir la siguiente palabra. Entonces a menor Perplexity tendrá menor cantidad de opciones, por lo que estas serán más certeras.
+En las distintas notebooks, **se compararon el modelo base y el modelo fine-tuned**, en algunas utilizando promps sacadas de los mismos chats y otras con promps predefinidas. En los 3 modelos hubieron cambios significativos entre su versión base y fine-tuned, pero no todos se acercaron al objetivo planteado. <br>
+Este análisis se puede ver a profundidad en la sección _Conclusiones_. <br>
 
 ## Comparación de modelos
 
@@ -63,44 +69,56 @@ En la siguiente tabla se comparan datos técnicos y elecciones de diseño que se
 | Tags                            |     <\|im_start\|>role ... <\|im_end\|>      | <\|system\|>...<\|end\|><\|user\|>...<\|end\|><\|assistant\|> | <\|talk\|><\|ax1\|>...<\|ax2\|>...<\|endoftext\|> |
 | Interfaz de Datos               | **Chat Templates** {role: ..., content: ...} |                         Manual String                         |                   Manual String                   |
 
-### Modelo base vs modelo fine-tuned
+Dados estos aspectos técnicos, utilizamos el siguiente dataset para poder comparar tanto los modelos con su versión base, como los modelos entre si. <br>
+
+- Conversaciones agrupadas totales: 19766
+- Palabras únicas: 27356
+- Diversidad léxica (porcentaje): 37.28967%
+- Cantidad de palabras por mensaje (Percentil 95): 75.0
+- Mensajes idénticos 177
+- Top palabras utilizadas:
+  1. no (muletilla) - bueno (no muletila)
+  2. me (muletilla) - como (no muletila)
+  3. la (muletilla) - eso (no muletila)
+
+### Modelo base vs modelo fine-tuned: ejemplos
 
 Los siguientes ejemplos buscan comparar individualmente cada modelo base contra su propio modelo fine-tuneado, basandonos en la respuesta obtenida según una prompt predefinida. <br>
 
-TODO: carga de datos
-
 #### GPT2-spanish
 
-> Pregunta:
+> Pregunta: Nos vemos más tarde?
 
-| Base | Fine-Tuned |
-| ---- | ---------- |
-|      |            |
+| Base                                                                                                                                                                                                                                                                                        | Fine-Tuned                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| antomm. —Sí, sí —respondió el capitán con aire inocente—. No tenemos tiempo para discutir sobre qué quiere usted decir "matar". ¿No está claro que no lo están haciendo de forma profesional o personal como una especie tan importante en las negociaciones entre la CIA y su gobierno pro | bueno, entonces la veré cuando salgo del trabajo y te digo que voy a necesitar para el fin de semana q viene. pero no se si me conviene en eso.. ya veremos!!!!! ahora vuelvo! tipo 17:20 o 18:30 por donde llego??ooo xdx |
 
 #### Phi-3
 
-> Pregunta:
+> Pregunta: Nos vemos más tarde?
 
-| Base | Fine-Tuned |
-| ---- | ---------- |
-|      |            |
+| Base                                                                                                                                                                                                                                                                                                                        | Fine-Tuned |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| La pregunta hace referencia a Melina, una persona o entidad ficticia en este contexto. Para abordar esta cuestión desde su perspectiva hipotética sobre la programática podría estructurarse así: "En relación con mi experiencia personal como asistente virtual basado en inteligencia artificial (IA), me resulta fascin |
+| jsjsjshhhd <\|msg_sep\|> oooh si xd [OTRO] mmm me di cuenta q era una pajarita con la mamá ahí le gusta a mí, y cree yo es solo por tener 10 años!! no sé dónde estamos. te busco en esta parte para verla mejor???                                                                                                         |
 
 #### SmolLM3-3B
 
-> Pregunta:
+> Pregunta: Nos vemos más tarde?
 
-| Base | Fine-Tuned |
-| ---- | ---------- |
-|      |            |
+| Base                                                                                                                                               | Fine-Tuned                                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| ¡Claro! Háblame más tarde y cuéntame qué te ha parecido mi respuesta hasta ahora. Estoy aquí para ayudarte siempre que lo necesites. ¡Hasta luego! | nop <\|msg_sep\|> me voy a dormir xq tengo q levantarme temprano mañana |
 
-### GPT2-spanish vs Phi-3 vs SmolLM3-3B
+### GPT2-spanish vs Phi-3 vs SmolLM3-3B: ejemplos
 
-| Prompt/Pregunta | Respuesta: GPT2 | Respuesta: Phi-3 | Respuesta: SmolLM3-3B |
-| --------------- | --------------- | ---------------- | --------------------- |
-|                 |                 |                  |                       |
-|                 |                 |                  |                       |
-|                 |                 |                  |                       |
-|                 |                 |                  |                       |
+| Prompt/Pregunta                | Respuesta: GPT2                                                                                                                                                                                                                                                   | Respuesta: Phi-3                                                                                                                                                                                                                                             | Respuesta: SmolLM3-3B                                                                                                                                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Hola, cómo estás?              | bienn. al menos lo hice por las dudas de q me iba a molestar un poco con el celu.. y no tuve la más ligera duda en su favor... pero creo que si me atendieron hoy mañana va siendo muy largo: es una relación algo incómoda para vos porque está mal hacer        | hmm no se <\|msg_sep\|> me parece a lo q te dije [OTRO] okaw.. pero eso tengo la intención en terminar y ver si qué haces esa parte del código con los datos .y.js ... voy por allí... yo también veía cuando vagaba desde casa hasta ahí para ir al trabajo | bien                                                                                                                                                                                                         |
+| Eu sale algo el finde?         | pero no c q onda la idea, te va a ir bien xdxdd3 y es más fácil para mí hija que si lo haga de vuelta al frente del grupo. como yo siento mucho todo esto desde hace tiempo :01579000 me parece raro eso ya veo!! o                                               | yo ya xq estoy en dónde <\|msg_sep\|> me fui del colegio a las 8 y luego volvi [OTRO] u.u, con los amigos hice una apunantada q no sé cómo se dice la otra forma :p es como mia tío le digo ojala queres hacer cosas                                         | si <\|msg_sep\|> mi mamá dice q si le digo a mis abuelos no les molesta... puedo ir al centro <\|msg_sep\|> pero necesito q me lleven a casa después <\|msg_sep\|> entonces voy a preguntarles cuando llegue |
+| Qué opinás de la programación? | que cosa?? como vas a tener q ver con los colectivos o algo así me dice mi mamá xq no puedo seguir estudiando pero estoy en un curso porque tengo clases y para el cole ya hace unas semanas era muy tarde, luego tuve clase por lo menos hasta las 12:30. asi si | uwu <\|msg_sep\|> no sé si lo pienso q estés con él o ella se puede hacer en algún momento, pero creo estar perdida... :c [OTRO] mmmm hablami hoy pq me gustaría quedar para ver y decirle porqué es tan lento a veces xd 30 minutos                         | mmh no sé <\|msg_sep\|> me gusta hasta cierto punto <\|msg_sep\|> pero es difícil para mí <\|msg_sep\|> y el tiempo q necesito... <\|msg_sep\|> y yo quiero ser buena en algo más rápido                     |
+| Me aburrooo, contame algo      | xd :c sarae tmb re bien q lo pasaste en el curso? o la universidad universitaria ? que te paso a vos como si yo fuera tu chica de sexto año y no me va nada del cole. así se nota cuando estás con alguien asi puede ser uggg                                     | ooh si bueno <\|msg_sep\|> y cómo te va? [OTRO] :c la otra mañana me da hambre xd no sé por q tengo los palillitos en las manitas a mí le pasa lo mismo pero se reaplica como con quines echados sin saberlo... yo voy mas fuerte eso                        | y te digo q no me gusta hablar mucho < \| msg_sep \| > yo estoy haciendo lo mismo y luego me arrepiento xd                                                                                                   |
+| Nos vemos más tarde?           | bueno, entonces la veré cuando salgo del trabajo y te digo que voy a necesitar para el fin de semana q viene. pero no se si me conviene en eso.. ya veremos!!!!! ahora vuelvo! tipo 17:20 o 18:30 por donde llego??ooo xdx                                        | jsjsjshhhd <\|msg_sep\|> oooh si xd [OTRO] mmm me di cuenta q era una pajarita con la mamá ahí le gusta a mí, y cree yo es solo por tener 10 años!! no sé dónde estamos. te busco en esta parte para verla mejor???                                          | nop <\|msg_sep\|> me voy a dormir xq tengo q levantarme temprano mañana                                                                                                                                      |
 
 ## ¿Cómo utilizar las notebooks?
 
@@ -151,7 +169,50 @@ Por último, si desea visualizarlo, se encuentran **evaluaciones** donde se comp
 
 ## Conclusión
 
-TODO: datos perplexity + redacción
+Cuando se comparan los distintos modelos entre sí en su versión fine-tuned, las respuestas de **SmolLM3-3B** destacan frente al resto por su coherencia y capacidad de capturar la escencia del autor. <br>
+La victoria de SmolLM3-3B no es una casualidad, las etapas de prueba y error nos indicaron el camino hacia nuestro objetivo. En esta sección exploraremos las distintas extrategias aplicadas dada ciertas hipótesis. <br>
+
+En la sección _Comparación de modelos_ los ejemplos de respuesta del modelo base versus su versión fine-tuned demostraron que, aunque no sea siempre una respuesta coherente, los modelos consiguieron recuperar manerismos de la forma de escritura del autor. Se rescatan palabras o expresiones conmunmente utilizados que contrastan con el modo original del modelo. Por ejemplo _Phi3_ aclara constantemente que es una IA, para luego dejar de nombrar esto en cada respuesta, o _SmolLM3-3B_ es formal, utliza los símbolos "¿" y "¡" que no tienden a ser respetados en una conversación virtual coloquial. El cambio radical de cada modelo respecto a su versión inicial, demuestra el éxito del fine-tune aplicado. <br>
+
+Pero como fue nombrado anteriormente, SmolLM3-3B destacó frente al resto. Uno de los mayores factores se debió a la orientación del modelo en sí. <br>
+**GPT2** [6] es un modelo de lenguaje base, fue creado para "completar texto" y por lo mismo se lo ajustó mediante CLM (Causal Language Modeling), además es un modelo con apenas 124 millones de parámetros, pequeño en comparación a los otros dos, cercanos a los 3 billones. Lo elegimos en un inicio por la limitación de hardware que teníamos en aquel momento, tuvimos que aplicar filtrado por similitud para evitar ruido en los datos de entrenamiento. <br>
+El siguiente modelo que pusimos a prueba fue **Phi-3**, un modelo orientado a instrucciones de Microsoft. Esta segunda vuelta elegimos un modelo con mayor cantidad de parámetros y más robusto. A diferencia de GPT2 que fue únicamente entrenado con artículos de Wikipedia y libros, Phi-3 fue entrenado, además de artículos y libros, con "datos supervisados en formato de chat de alta calidad, que cubren diversos temas para reflejar las preferencias humanas en diferentes aspectos, tales como el seguimiento de instrucciones, la veracidad, la honestidad y la utilidad" [7]. Esta diversificación en su entrenamiento contrasta desde el modelo base de Phi-3 respecto a GPT2. <br>
+Por último pusimos a prueba a **SmolLM3-3B**, un modelo creado para preservar la eficiencia, es decir que pueda funcionar en GPUs locales, sin compremeter su asertividad [8]. Desde su modelo base notamos una mejora significativa: el modelo comprende que debe entablar una conversación y responde coherentemente. Decidimos omitir el filtrado por similitud, esperando enriquecer la conversación y confiando en que no confundiría al modelo. <br>
+Una de las mayores mejoras es su interfaz de datos de entrada: {role: ..., content: ...}, este formato nos permitió ingresar conversaciones de la forma:
+
+```
+{role: "user", content: "hola, cómo estas"}
+{role: "assistant", content: "bieen, pero algo cansada, vos?"}
+{role: "user", content: "bien también, uh cansada porq?"}
+```
+
+Cuando en los modelos anteriores (Phi-3 y GPT2) habíamos intentado replicar lo mismo (dar el contexto de una conversación), tuvimos que crear tags internos:
+
+```
+[OTRO] hola, cómo estas
+[YO] bieen, pero algo cansada, vos?
+[OTRO] bien también, uh cansada porq?
+```
+
+Los anteriores modelos no pudieron asimilar correctamente el uso de estos tags, en los ejemplos anteriores aparece entre la respuesta "[OTRO]" cuando este tag representa que el autor no ha enviado ese mensaje. <br>
+En contraste, SmolLM3-3B ha podido incorporar los tags internos _<\|msgsep\|_> correctamente, estos representan cuando el autor del mensaje ha presionado _enter_ pero continúa enviando mensajes relacionados entre sí.
+
+Por último decidimos medir la **Perplexity** de los modelos, tanto su versión base como la fine-tuned. <br>
+En criollo esta métrica evalúa entre cuántas _opciones_ está debatiendo el modelo para poder predecir la siguiente palabra. Entonces a menor Perplexity tendrá menor cantidad de opciones, por lo que estas serán más certeras. <br>
+Dado el dataset especificado en _Comparación de modelos_, se obtuvieron los siguientes resultados:
+
+| GPT2-spanish                                             |                       Phi-3                       |                          SmolLM3-3B                          |
+| -------------------------------------------------------- | :-----------------------------------------------: | :----------------------------------------------------------: |
+| ![gpt2 perplexity](./images/gpt2-spanish_perplexity.png) | ![phi3 perplexity](./images/phi-3_perplexity.png) | ![smollm3 3b perplexity](./images/smollm3-3b_perplexity.png) |
+
+| Model        | Base | Fine-Tuned |
+| ------------ | :--: | :--------: |
+| GPT2-spanish | 1903 |   749.2    |
+| Phi-3        | 37.3 |    6.1     |
+| SmolLM3-3B   | 29.7 |     3      |
+
+A partir de estos resultados, se observa una caída fuerte de Perplexity en los tres modelos luego del fine-tuning, lo que indica que el entrenamiento efectivamente alineó las predicciones del modelo con el estilo y distribución del dataset. En particular, **SmolLM3-3B** y **Phi-3** alcanzan valores bajos (3 y 6.1), lo que sugiere que el modelo “duda menos” al elegir la próxima palabra dentro de este dominio conversacional como habíamos explicado recién, generando respuestas más consistentes con los chats.  
+En cambio, aunque **GPT2-spanish** también mejora (de 1903 a 749.2), sus valores siguen siendo muy altos en comparación, lo cual es coherente con su menor capacidad y con el hecho de que es un modelo base orientado a completar texto.
 
 ## Tecnologías utilizadas
 
@@ -170,7 +231,7 @@ Proyecto realizado para la materia Minería de Texto, de la Facultad de Astronom
 
 Integrantes:
 
-- [Nicolás Bazan](https://github.com/BazanNicolas)
+- [Nicolás Marcelo Bazán](https://github.com/BazanNicolas)
 - [Melina Rocío Morales](https://github.com/Paaprikaa)
 
 ## Referencias
@@ -180,3 +241,6 @@ Integrantes:
 3. Comet November 21, 2024. _Perplexity for LLM Evaluation_. Recuperado de https://www.comet.com/site/blog/perplexity-for-llm-evaluation/
 4. UNC Supercómputo Wiki (s.f.). Recuperado de https://wiki.ccad.unc.edu.ar/
 5. CLOUDFLARE (s.f.). _¿Qué es la adaptación de bajo rango (LoRA)?_ Recuperado de https://www.cloudflare.com/es-es/learning/aiwhat-is-lora/
+6. Hugging Face. (s.f.). _DeepESP/gpt2-spanish_. Recuperado de https://huggingface.co/DeepESP/gpt2-spanish
+7. Hugging Face. (s.f.). _microsoft/Phi-3-mini-4k-instruct_. Recuperado de https://huggingface.co/microsoft/Phi-3-mini-4k-instruct
+8. Hugging Face. (s.f.). _HuggingFaceTB/SmolLM3-3B_. Recuperado de https://huggingface.co/HuggingFaceTB/SmolLM3-3B
